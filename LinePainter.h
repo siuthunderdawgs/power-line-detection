@@ -25,7 +25,9 @@ public:
 
 	std::vector<LineSegment> GetLines() const;
 	void SetLines(std::vector<LineSegment> lines);
+	void SetLines(std::vector<cv::Vec2f> lines);
 	void AddLines(LineSegment line);
+	void RstLines();
 
 	cv::Mat* GetImage() const;
 	void SetImage(cv::Mat* srcImage);

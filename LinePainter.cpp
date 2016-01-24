@@ -39,9 +39,26 @@ void LinePainter::SetLines(std::vector<LineSegment> lines)
 	lines_ = lines;
 }
 
+void LinePainter::SetLines(std::vector<cv::Vec2f> lines)
+{
+	LineSegment line;
+
+	std::vector<cv::Vec2f>::iterator it;
+	for(it = lines.begin(); it != lines.end(); ++it)
+	{
+		line.SetPts(float((*it)[0]), float((*it)[1]));
+		AddLines(line);
+	}
+}
+
 void LinePainter::AddLines(LineSegment line)
 {
 	lines_.push_back(line);
+}
+
+void LinePainter::RstLines()
+{
+	lines_.clear();
 }
 
 cv::Mat* LinePainter::GetImage() const

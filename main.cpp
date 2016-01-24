@@ -2,6 +2,7 @@
 #include <highgui.h>
 
 #include <iostream>
+#include <vector>
 #include <math.h>
 
 #include "LineSegment.h"
@@ -25,23 +26,19 @@ int main(int argc, char** argv)
 	 return -1;
 	}
 
-
 	cv::Size image_size = image_src.size();
 
 	cv::Mat image_mask = cv::Mat::zeros(image_size, CV_8UC3);
 	cv::Mat image_des = cv::Mat::zeros(image_size, CV_8UC3);
+	cv::Mat image_can = cv::Mat::zeros(image_size, CV_8UC3);
 
-	LineSegment line1;
-	line1.SetPt1(cv::Point(0,0));
-	line1.SetPt2(cv::Point(250,250));
-
-	LineSegment line2;
-	line2.SetPts(float(125),float(45*M_PI/180));
+	std::vector<cv::Vec2f> lines;
+	cv::Canny(image_src, image_can, 50, 200, 3);
+	cv::HoughLines(image_can, lines, 1, CV_PI/180, 100, 0, 0);
 
 	LinePainter painter;
 	painter.SetImage(&image_mask);
-	painter.AddLines(line1);
-	painter.AddLines(line2);
+	painter.SetLines(lines);
 	painter.DrawLines();
 
 	LineOverlayPainter opainter;
