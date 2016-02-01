@@ -51,6 +51,18 @@ void LinePainter::SetLines(std::vector<cv::Vec2f> lines)
 	}
 }
 
+void LinePainter::SetLines(std::vector<cv::Vec4i> lines)
+{
+	LineSegment line;
+
+	std::vector<cv::Vec4i>::iterator it;
+	for(it = lines.begin(); it != lines.end(); ++it)
+	{
+		line.SetPts(cv::Point((*it)[0],(*it)[1]), cv::Point((*it)[2],(*it)[3]));
+		AddLines(line);
+	}
+}
+
 void LinePainter::AddLines(LineSegment line)
 {
 	lines_.push_back(line);

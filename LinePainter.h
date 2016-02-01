@@ -26,6 +26,7 @@ public:
 	std::vector<LineSegment> GetLines() const;
 	void SetLines(std::vector<LineSegment> lines);
 	void SetLines(std::vector<cv::Vec2f> lines);
+	void SetLines(std::vector<cv::Vec4i> lines);
 	void AddLines(LineSegment line);
 	void RstLines();
 
