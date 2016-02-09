@@ -8,6 +8,7 @@
 #include "LineSegment.h"
 #include "LinePainter.h"
 #include "LineOverlayPainter.h"
+#include "WindowedHoughTransform.h"
 
 
 const int slider_max = 200;
@@ -21,11 +22,12 @@ cv::Mat image_can;
 
 void on_trackbar(int pos, void *)
 {
-	int thresh = pos + 100;
+	int thresh = pos + 20;
 
 	image_mask = cv::Scalar(0,0,0);
 	image_des = cv::Scalar(0,0,0);
 
+	/*
 	std::vector<cv::Vec2f> lines;
 	cv::HoughLines(image_can, lines, 1, CV_PI/180, thresh, 0, 0);
 
@@ -33,6 +35,9 @@ void on_trackbar(int pos, void *)
 	painter.SetImage(&image_mask);
 	painter.SetLines(lines);
 	painter.DrawLines();
+	*/
+
+	WindowedHoughLine(image_can, image_mask, 8, 8, 1, CV_PI/180, thresh);
 
 	LineOverlayPainter opainter;
 	opainter.SetImageSrc(&image_src);
@@ -74,7 +79,7 @@ int main(int argc, char** argv)
 
 	slider = 0;
 
-	cv::createTrackbar("Hough Threshold = Position + 100", "Display Image", &slider, slider_max, on_trackbar);
+	cv::createTrackbar("Hough Threshold = Position + 20", "Display Image", &slider, slider_max, on_trackbar);
 	while(char(cv::waitKey(1)) != 'q'){}
 
 	return 0;
