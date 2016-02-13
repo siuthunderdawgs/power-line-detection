@@ -12,63 +12,30 @@
 #include "highgui.h"
 
 #include "LinePainter.h"
+#include "Windows.h"
 #include "WindowedHoughTransform.h"
 
 void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, double rho, double theta, int thresh)
 {
 	cv::Mat mask = cv::Mat::zeros(input.size(), CV_8UC3);
 
-	int input_height = input.size().height;
-	int input_width = input.size().width;
+	std::vector< std::vector <cv::Mat> > windows_input, windows_mask;
+	windows_input = CreateWindows(input, horz, vert);
+	windows_mask = CreateWindows(mask, horz, vert);
 
-	std::pair<int,int> range;
-	std::vector< std::pair<int, int> > horz_range, vert_range;
 
-	int incr_vert = input_height / vert;
-	int incr_horz = input_width / horz;
-
-	for(int i = 0; i < input_height; i += incr_vert)
+	for(unsigned int i = 0; i < windows_input.size(); i++)
 	{
-		range.first = i;
-
-		if(i+incr_vert < input_height)
-			range.second = i + incr_vert;
-		else
-			range.second = input_height;
-
-		vert_range.push_back(range);
-	}
-
-	for(int i = 0; i < input_width; i += incr_horz)
-	{
-		range.first = i;
-
-		if(i+incr_horz < input_width)
-			range.second = i + incr_horz;
-		else
-			range.second = input_width;
-
-		horz_range.push_back(range);
-	}
-
-	int N = vert_range.size() * horz_range.size();
-
-	for(int i = 0; i < horz_range.size(); i++)
-	{
-		for (int j = 0; j < vert_range.size(); j++)
+		for(unsigned int j = 0; j < windows_input[i].size(); j++)
 		{
-			cv::Point topleft(horz_range[i].first, vert_range[j].first);
-			cv::Point bottomright(horz_range[i].second, vert_range[j].second);
-			cv::Rect roi(topleft, bottomright);
-
-			cv::Mat win_in = input(roi);
-			cv::Mat win_out = mask(roi);
+			cv::Mat win_in = windows_input[i][j];
+			cv::Mat win_mask = windows_mask[i][j];
 
 			std::vector<cv::Vec2f> lines;
 			cv::HoughLines(win_in, lines, rho, theta, thresh, 0, 0);
 
 			LinePainter painter;
-			painter.SetImage(&win_out);
+			painter.SetImage(&win_mask);
 			painter.SetLines(lines);
 			painter.DrawLines();
 			painter.RstLines();
