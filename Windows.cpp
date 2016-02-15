@@ -6,6 +6,8 @@
  */
 
 #include <vector>
+#include <iostream>
+#include "assert.h"
 
 #include "cv.h"
 #include "highgui.h"
@@ -20,35 +22,37 @@ std::vector< std::vector<cv::Mat> > CreateWindows(cv::Mat input, int horz, int v
 	int input_height = input.size().height;
 	int input_width = input.size().width;
 
-	std::pair<int,int> range;
 	std::vector< std::pair<int, int> > horz_range, vert_range;
 
 	int incr_vert = input_height / vert;
 	int incr_horz = input_width / horz;
 
-	for(int i = 0; i < input_height; i += incr_vert)
+	for(int i = 0; i < vert; i++)
 	{
-		range.first = i;
+		std::pair<int,int> range;
+		range.first = i*incr_vert;
 
-		if(i+incr_vert < input_height)
-			range.second = i + incr_vert;
+		if((i+2)*incr_vert <= input_height)
+			range.second = (i+1)*incr_vert;
 		else
 			range.second = input_height;
 
 		vert_range.push_back(range);
 	}
 
-	for(int i = 0; i < input_width; i += incr_horz)
+	for(int i = 0; i < horz; i++)
 	{
-		range.first = i;
+		std::pair<int,int> range;
+		range.first = i*incr_horz;
 
-		if(i+incr_horz < input_width)
-			range.second = i + incr_horz;
+		if((i+2)*incr_horz <= input_width)
+			range.second = (i+1)*incr_horz;
 		else
 			range.second = input_width;
 
 		horz_range.push_back(range);
 	}
+
 
 	for(unsigned int i = 0; i < horz_range.size(); i++)
 	{
