@@ -14,5 +14,6 @@
 #include "highgui.h"
 
 std::vector< std::vector<cv::Mat> > CreateWindows(cv::Mat input, int horz, int vert);
+cv::Mat ComputeWindowsStatistics(std::vector< std::vector<cv::Mat> > windows);
 
 #endif /* WINDOWS_H_ */

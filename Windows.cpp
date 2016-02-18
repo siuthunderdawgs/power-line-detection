@@ -72,4 +72,26 @@ std::vector< std::vector<cv::Mat> > CreateWindows(cv::Mat input, int horz, int v
 	return windows;
 }
 
+cv::Mat ComputeWindowsStatistics(std::vector< std::vector<cv::Mat> > windows)
+{
+	cv::Mat stats = cv::Mat::zeros(windows[0].size(), windows.size(), CV_8UC2);
 
+	for(int i = 0; i < windows.size(); i++)
+	{
+		for(int j = 0; j < windows[i].size(); j++)
+		{
+			cv::Mat mean;
+			cv::Mat stddev;
+
+			cv::meanStdDev(windows[i][j], mean, stddev);
+
+			int meanval = int(mean.at<double>(0,0));
+			int stddevval = int(stddev.at<double>(0,0));
+
+			stats.at<cv::Vec2b>(i,j)[0] = meanval;
+			stats.at<cv::Vec2b>(i,j)[1] = stddevval;
+		}
+	}
+
+	return stats;
+}
