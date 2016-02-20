@@ -95,3 +95,21 @@ cv::Mat ComputeWindowsStatistics(std::vector< std::vector<cv::Mat> > windows)
 
 	return stats;
 }
+
+void PrintWindowsStatistics(std::vector< std::vector<cv::Mat> > windows)
+{
+	cv::Mat stats = ComputeWindowsStatistics(windows);
+
+	for(unsigned int i = 0; i < windows.size(); i++)
+	{
+		for(unsigned int j = 0; j < windows[i].size(); j++)
+		{
+			double mean = stats.at<cv::Vec2b>(i,j)[0];
+			double stddev = stats.at<cv::Vec2b>(i,j)[1];
+
+			std::cout << "Window [" << i << "][" << j << "]: ";
+			std::cout << "Mean: " << mean << " ";
+			std::cout << "Std Dev: " << stddev << "\n";
+		}
+	}
+}
