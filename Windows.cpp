@@ -113,3 +113,63 @@ void PrintWindowsStatistics(std::vector< std::vector<cv::Mat> > windows)
 		}
 	}
 }
+
+double ComputeWindowClutter(cv::Mat input, int horz, int vert)
+{
+	std::vector< std::vector<cv::Mat> > windows;
+	windows = CreateWindows(input, horz, vert);
+
+	cv::Mat stats = ComputeWindowsStatistics(windows);
+
+	double sum = 0;
+	for(unsigned int i = 0; i < windows.size(); i++)
+	{
+		for(unsigned int j = 0; j < windows[i].size(); j++)
+		{
+			double stddev = stats.at<cv::Vec2b>(i,j)[1];
+			double variance = pow(stddev,2);
+
+			sum += variance;
+		}
+	}
+
+	double size = double(windows.size() * windows[0].size());
+	double clutter = sqrt(sum/size);
+
+	return clutter;
+}
+
+cv::Mat ComputeImageClutter(cv::Mat input, int ihorz, int ivert, int whorz, int wvert)
+{
+	cv::Mat clutter = cv::Mat::zeros(cv::Size(ihorz, ivert), CV_32F);
+
+	std::vector< std::vector<cv::Mat> > windows;
+	windows = CreateWindows(input, ihorz, ivert);
+
+	for(unsigned int i = 0; i < windows.size(); i++)
+	{
+		for(unsigned int j = 0; j < windows[i].size(); j++)
+		{
+			double clutter_win = ComputeWindowClutter(windows[i][j], whorz, wvert);
+			clutter.at<double>(i,j) = clutter_win;
+		}
+	}
+
+	return clutter;
+}
+
+void PrintImageClutter(cv::Mat input, int ihorz, int ivert, int whorz, int wvert)
+{
+	cv::Mat clutter = ComputeImageClutter(input, ihorz, ivert, whorz, wvert);
+
+	for(int i = 0; i < clutter.size().width; i++)
+	{
+		for(int j = 0; j < clutter.size().height; j++)
+		{
+			double clutter_win = clutter.at<double>(i,j);
+
+			std::cout << "Window [" << i << "][" << j << "]: ";
+			std::cout << "Clutter: " << clutter_win << "\n";
+		}
+	}
+}
