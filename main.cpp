@@ -39,6 +39,24 @@ void on_trackbar(int pos, void *)
 
 	WindowedHoughLine(image_can, image_mask, 4, 4, 1, CV_PI/180, 0, 0.7971, 15.9820);
 
+	cv::Mat temp;
+	std::vector<cv::Vec2f> lines_temp;
+
+	cvtColor(image_mask, temp, CV_BGR2GRAY);
+	temp.copyTo(image_mask);
+
+	cv::HoughLines(image_mask, lines_temp, 1, CV_PI/180, thresh, 0, 0);
+
+	image_mask = cv::Mat::zeros(image_mask.size(), CV_8UC3);
+
+	LinePainter painter;
+	painter.SetImage(&image_mask);
+	painter.SetThickness(2);
+	painter.SetColor(cv::Scalar(255,255,255));
+	painter.SetLines(lines_temp);
+	painter.DrawLines();
+	painter.RstLines();
+
 	LineOverlayPainter opainter;
 	opainter.SetImageSrc(&image_src);
 	opainter.SetMask(&image_mask);
