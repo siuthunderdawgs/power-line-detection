@@ -18,7 +18,7 @@
 
 extern cv::Mat image_src;
 
-void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, double rho, double theta, int thresh)
+void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, double rho, double theta, int thresh, double m, double b)
 {
 	cv::Mat mask = cv::Mat::zeros(input.size(), CV_8UC3);
 
@@ -35,8 +35,16 @@ void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, doubl
 			cv::Mat win_mask = windows_mask[i][j];
 			cv::Mat win_src = windows_src[i][j];
 
+			double clutter = ComputeWindowClutter(win_in, 4, 4);
+
+			double cthresh;
+			if(thresh == 0)
+				cthresh = m*clutter + b;
+			else
+				cthresh = (float)thresh;
+
 			std::vector<cv::Vec2f> lines, lines_temp;
-			cv::HoughLines(win_in, lines_temp, rho, theta, thresh, 0, 0);
+			cv::HoughLines(win_in, lines_temp, rho, theta, cthresh, 0, 0);
 
 			for(std::vector<cv::Vec2f>::iterator it = lines_temp.begin(); it != lines_temp.end(); ++it)
 			{
@@ -72,8 +80,8 @@ void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, doubl
 					vstddev[k] = mstddev.at<double>(0,0);
 				}
 
-				float thresh = vstddev[0] >= vstddev[2] ? vstddev[0] : vstddev[2];
-				if(abs(vmean[0] - vmean[2]) <= 1*thresh)
+				float fthresh = vstddev[0] >= vstddev[2] ? vstddev[0] : vstddev[2];
+				if(abs(vmean[0] - vmean[2]) <= 1*fthresh)
 					lines.push_back(*it);
 				else
 					std::cout << "Toss out!" << std::endl;
