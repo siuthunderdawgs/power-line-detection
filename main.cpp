@@ -37,7 +37,7 @@ void on_trackbar(int pos, void *)
 	painter.DrawLines();
 	*/
 
-	WindowedHoughLine(image_can, image_mask, 8, 8, 1, CV_PI/180, thresh);
+	WindowedHoughLine(image_can, image_mask, 4, 4, 1, CV_PI/180, 0, 0.7971, 15.9820);
 
 	LineOverlayPainter opainter;
 	opainter.SetImageSrc(&image_src);
