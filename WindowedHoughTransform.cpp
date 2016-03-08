@@ -83,8 +83,6 @@ void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, doubl
 				float fthresh = vstddev[0] >= vstddev[2] ? vstddev[0] : vstddev[2];
 				if(abs(vmean[0] - vmean[2]) <= 1*fthresh)
 					lines.push_back(*it);
-				else
-					std::cout << "Toss out!" << std::endl;
 			}
 
 			LinePainter painter;
