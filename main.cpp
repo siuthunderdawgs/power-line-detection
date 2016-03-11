@@ -22,7 +22,8 @@ void on_trackbar(int pos, void *)
 	int thresh = pos + 20;
 
 	cv::Mat image_mask;
-	PowerLineDetection(image_src, image_mask, 0.7971, 15.9820, thresh);
+	//PowerLineDetection(image_src, image_mask, 0.7971, 15.9820, thresh);
+	PowerLineDetection(image_src, image_mask, 0.5, 10, 200);
 
 	cv::Mat image_des;
 	cv::addWeighted(image_src, 0.8, image_mask, 0.2, 0, image_des);

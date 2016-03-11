@@ -21,9 +21,11 @@ void PowerLineDetection(cv::Mat input, cv::Mat& output, double p1_m, double p1_b
 	cv::Mat image_des = cv::Mat::zeros(image_size, CV_8UC3);
 
 	cv::Mat image_can = cv::Mat::zeros(image_size, CV_8UC3);
-	cv::Canny(image_src, image_can, 50, 200, 3);
+	cv::Canny(image_src, image_can, 50, 90, 3);
+	cv::imshow("Canny", image_can);
 
 	WindowedHoughLine(image_can, image_mask, 4, 4, 1, CV_PI/180, 0, p1_m, p1_b);
+	cv::imshow("hough", image_mask);
 
 	cv::Mat temp;
 	std::vector<cv::Vec2f> lines_temp;
