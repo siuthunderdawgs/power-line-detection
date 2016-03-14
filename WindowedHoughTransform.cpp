@@ -18,7 +18,7 @@
 
 extern cv::Mat image_src;
 
-void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, double rho, double theta, int thresh, double m, double b)
+void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, double rho, double theta, double m, double b)
 {
 	cv::Mat mask = cv::Mat::zeros(input.size(), CV_8UC3);
 
@@ -36,12 +36,7 @@ void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, doubl
 			cv::Mat win_src = windows_src[i][j];
 
 			double clutter = ComputeWindowClutter(win_in, 4, 4);
-
-			double cthresh;
-			if(thresh == 0)
-				cthresh = m*clutter + b;
-			else
-				cthresh = (float)thresh;
+			double cthresh = m*clutter + b;
 
 			std::vector<cv::Vec2f> lines, lines_temp;
 			cv::HoughLines(win_in, lines_temp, rho, theta, cthresh, 0, 0);
