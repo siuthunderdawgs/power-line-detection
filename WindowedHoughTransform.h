@@ -11,6 +11,6 @@
 #include "cv.h"
 #include "highgui.h"
 
-void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, double rho, double theta, int thresh, double m = 0, double b = 0);
+void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, double rho, double theta, double m, double b);
 
 #endif /* WINDOWEDHOUGHTRANSFORM_H_ */
