@@ -11,6 +11,8 @@
 #include "cv.h"
 #include "highgui.h"
 
-void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, double rho, double theta, double m, double b);
+#include "LineSegment.h"
+
+void WindowedHoughLine(cv:: Mat image_src, cv::Mat image_can, std::vector<LineSegment>& lines, int horz, int vert, double rho, double theta, double m, double b);
 
 #endif /* WINDOWEDHOUGHTRANSFORM_H_ */

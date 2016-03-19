@@ -12,85 +12,56 @@
 #include "cv.h"
 #include "highgui.h"
 
-#include "LinePainter.h"
 #include "Windows.h"
 #include "WindowedHoughTransform.h"
+#include "LinePainter.h"
+#include "LineClipping.h"
 
-extern cv::Mat image_src;
-
-void WindowedHoughLine(cv::Mat input, cv::Mat& output, int horz, int vert, double rho, double theta, double m, double b)
+void WindowedHoughLine(cv:: Mat image_src, cv::Mat image_can, std::vector<LineSegment>& lines, int horz, int vert, double rho, double theta, double m, double b)
 {
-	cv::Mat mask = cv::Mat::zeros(input.size(), CV_8UC3);
+	std::vector<LineSegment> lines_local;
 
-	std::vector< std::vector <cv::Mat> > windows_input, windows_mask, windows_src;
-	windows_input = CreateWindows(input, horz, vert);
-	windows_mask = CreateWindows(mask, horz, vert);
+	std::vector< std::vector <cv::Mat> > windows_src, windows_can;
 	windows_src = CreateWindows(image_src, horz, vert);
+	windows_can = CreateWindows(image_can, horz, vert);
 
-	for(unsigned int i = 0; i < windows_input.size(); i++)
+	for(unsigned int i = 0; i < windows_can.size(); i++)
 	{
-		for(unsigned int j = 0; j < windows_input[i].size(); j++)
+		for(unsigned int j = 0; j < windows_can[i].size(); j++)
 		{
-			cv::Mat win_in = windows_input[i][j];
-			cv::Mat win_mask = windows_mask[i][j];
 			cv::Mat win_src = windows_src[i][j];
+			cv::Mat win_can = windows_can[i][j];
 
-			double clutter = ComputeWindowClutter(win_in, 4, 4);
+			double clutter = ComputeWindowClutter(win_src, 4, 4);
 			double cthresh = m*clutter + b;
 
-			std::vector<cv::Vec2f> lines, lines_temp;
-			cv::HoughLines(win_in, lines_temp, rho, theta, cthresh, 0, 0);
+			std::vector<cv::Vec2f> lines;
+			cv::HoughLines(win_can, lines, rho, theta, cthresh, 0, 0);
 
-			for(std::vector<cv::Vec2f>::iterator it = lines_temp.begin(); it != lines_temp.end(); ++it)
+			cv::Size size; cv::Point ofs;
+			win_src.locateROI(size, ofs);
+			int x = ofs.x;
+			int y = ofs.y;
+			int img_rows = size.height;
+			int img_cols = size.width;
+			int win_rows = win_can.rows;
+			int win_cols = win_can.cols;
+
+			cv::Rect roi = cv::Rect(x, y, win_cols, win_rows);
+
+			// Debugging Information
+			// printf("(%d,%d,%d,%d,%d,%d)\n", x, y, win_cols, win_rows, img_cols, img_rows);
+
+			for(std::vector<cv::Vec2f>::iterator it = lines.begin(); it != lines.end(); ++it)
 			{
-				float rho = (*it)[0];
-				float theta = (*it)[1];
-				float drho[] = {-5, 0, 5};
+				LineSegment line;
+				line.SetPts(float((*it)[0]), float((*it)[1]));
+				line.AddOffset(cv::Point(x,y));
 
-				LineSegment line[3];
-
-				for(int k = 0; k < 3; k++)
-				{
-					line[k] = LineSegment(rho + drho[k], theta);
-				}
-
-				float vmean[3], vstddev[3];
-
-				for(int k = 0; k < 3; k++)
-				{
-					cv::Mat mmean, mstddev;
-					cv::Mat mask = cv::Mat::zeros(win_in.size(), CV_8U);
-
-					LinePainter painter;
-					painter.SetImage(&mask);
-					painter.SetThickness(2);
-					painter.SetColor(cv::Scalar(255,255,255));
-					painter.AddLines(line[k]);
-					painter.DrawLines();
-					painter.RstLines();
-
-					meanStdDev(win_src, mmean, mstddev, mask);
-
-					vmean[k] = mmean.at<double>(0,0);
-					vstddev[k] = mstddev.at<double>(0,0);
-				}
-
-				float fthresh = vstddev[0] >= vstddev[2] ? vstddev[0] : vstddev[2];
-				if(abs(vmean[0] - vmean[2]) <= 1*fthresh)
-					lines.push_back(*it);
+				if(ClipLine(line, roi))	lines_local.push_back(line);
 			}
-
-			LinePainter painter;
-			painter.SetImage(&win_mask);
-			painter.SetLines(lines);
-			painter.DrawLines();
-			painter.RstLines();
-
-			//cv::namedWindow("Sample");
-			//cv::imshow("Sample", win_in);
-			//cv::waitKey();
 		}
 	}
 
-	output = mask.clone();
+	lines = lines_local;
 }

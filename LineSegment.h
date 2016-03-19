@@ -22,9 +22,12 @@ public:
 	void SetPt2(cv::Point pt2);
 	void SetPts(cv::Point pt1, cv::Point pt2);
 	void SetPts(float rho, float theta);
+	void AddOffset(cv::Point pt0);
 
 	cv::Point GetPt1();
 	cv::Point GetPt2();
+
+	void GetHesseNormalForm(double& rho, double& theta);
 
 private:
 	cv::Point pt1_;

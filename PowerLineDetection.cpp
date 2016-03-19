@@ -10,7 +10,9 @@
 
 #include "PowerLineDetection.h"
 #include "WindowedHoughTransform.h"
+#include "LineSegment.h"
 #include "LinePainter.h"
+#include "Filters.h"
 
 void PowerLineDetection(cv::Mat input, cv::Mat& output, double p1_m, double p1_b, double p2)
 {
@@ -23,25 +25,42 @@ void PowerLineDetection(cv::Mat input, cv::Mat& output, double p1_m, double p1_b
 	cv::Mat image_can = cv::Mat::zeros(image_size, CV_8UC3);
 	cv::Canny(image_src, image_can, 50, 200, 3);
 
-	WindowedHoughLine(image_can, image_mask, 4, 4, 1, CV_PI/180, p1_m, p1_b);
+	{
+		std::vector<LineSegment> lines_temp;
+		WindowedHoughLine(image_src, image_can, lines_temp, 4, 4, 1, CV_PI/180, p1_m, p1_b);
 
-	cv::Mat temp;
-	std::vector<cv::Vec2f> lines_temp;
+		FilterBackgroundContinuity(lines_temp, lines_temp, image_src, 10, 1);
 
-	cvtColor(image_mask, temp, CV_BGR2GRAY);
-	temp.copyTo(image_mask);
+		LinePainter painter;
+		painter.SetImage(&image_mask);
+		painter.SetLines(lines_temp);
+		painter.DrawLines();
+		painter.RstLines();
 
-	cv::HoughLines(image_mask, lines_temp, 1, CV_PI/180, p2, 0, 0);
+		// Debugging Code
+		// cv::imshow("Mask", image_mask);
+	}
 
-	image_mask = cv::Mat::zeros(image_mask.size(), CV_8UC3);
+	{
+		cv::Mat temp;
+		cvtColor(image_mask, temp, CV_BGR2GRAY);
+		temp.copyTo(image_mask);
+	}
 
-	LinePainter painter;
-	painter.SetImage(&image_mask);
-	painter.SetThickness(2);
-	painter.SetColor(cv::Scalar(255,255,255));
-	painter.SetLines(lines_temp);
-	painter.DrawLines();
-	painter.RstLines();
+	{
+		std::vector<cv::Vec2f> lines_temp;
+		cv::HoughLines(image_mask, lines_temp, 1, CV_PI/180, p2, 0, 0);
+
+		image_mask = cv::Mat::zeros(image_mask.size(), CV_8UC3);
+
+		LinePainter painter;
+		painter.SetImage(&image_mask);
+		painter.SetThickness(2);
+		painter.SetColor(cv::Scalar(255,255,255));
+		painter.SetLines(lines_temp);
+		painter.DrawLines();
+		painter.RstLines();
+	}
 
 	output = image_mask.clone();
 }
