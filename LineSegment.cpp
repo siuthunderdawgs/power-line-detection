@@ -7,6 +7,8 @@
 
 #include "LineSegment.h"
 
+#include <cstdlib>
+
 #include "cv.h"
 #include "highgui.h"
 
@@ -59,6 +61,14 @@ void LineSegment::SetPts(float rho, float theta)
     pt2_.y = cvRound(y0 - 1000*(a));
 }
 
+void LineSegment::AddOffset(cv::Point pt0)
+{
+	pt1_.x = pt0.x + pt1_.x;
+	pt1_.y = pt0.y + pt1_.y;
+	pt2_.x = pt0.x + pt2_.x;
+	pt2_.y = pt0.y + pt2_.y;
+}
+
 cv::Point LineSegment::GetPt1()
 {
 	return pt1_;
@@ -67,4 +77,24 @@ cv::Point LineSegment::GetPt1()
 cv::Point LineSegment::GetPt2()
 {
 	return pt2_;
+}
+
+void LineSegment::GetHesseNormalForm(double& rho, double& theta)
+{
+	double rise = pt2_.y - pt1_.y;
+	double run = pt2_.x - pt1_.x;
+	double slope = rise/run;
+
+	double phi = atan(fabs(slope));
+
+	if(slope >= 0)
+	{
+		theta = M_PI/2 - phi;
+	}
+	else
+	{
+		theta = M_PI - (M_PI/2-phi);
+	}
+
+	rho = pt2_.x*cos(theta) + pt2_.y*sin(theta);
 }
