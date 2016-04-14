@@ -9,6 +9,7 @@
 #include "highgui.h"
 
 #include <vector>
+#include <algorithm>
 
 #include "Filters.h"
 #include "LineSegment.h"
@@ -97,6 +98,34 @@ void FilterKnownAngle(std::vector<LineSegment> input, std::vector<LineSegment>& 
 	output = output_local;
 }
 
+void FilterMedianAngle(std::vector<LineSegment> input, std::vector<LineSegment>& output, double angle_thresh)
+{
+	std::vector<LineSegment> output_local;
+
+	std::vector<double> angles;
+	for(std::vector<LineSegment>::iterator it = input.begin(); it != input.end(); ++it)
+	{
+		double rho, theta;
+		it->GetHesseNormalForm(rho, theta);
+
+		angles.push_back(theta);
+	}
+	double median = GetMedian(angles);
+
+	for(std::vector<LineSegment>::iterator it = input.begin(); it != input.end(); ++it)
+	{
+		double rho, theta;
+		it->GetHesseNormalForm(rho, theta);
+
+		if(median - angle_thresh < theta && theta < median + angle_thresh)
+		{
+			output_local.push_back(*it);
+		}
+	}
+
+	output = output_local;
+}
+
 void DebugFilterBackgroundContinuity(cv::Mat image_src, LineSegment* lines, double* vmean, double* vstddev)
 {
 	cv::Mat mask;
@@ -128,4 +157,23 @@ void DebugFilterBackgroundContinuity(cv::Mat image_src, LineSegment* lines, doub
 
 	cv::imshow("Lines", mask);
 	cv::waitKey();
+}
+
+double GetMedian(std::vector<double> input)
+{
+	double median;
+	unsigned int size = input.size();
+
+	std::sort(input.begin(), input.end());
+
+	if (size  % 2 == 0)
+	{
+		median = (input[size / 2 - 1] + input[size / 2]) / 2;
+	}
+	else
+	{
+		median = input[size / 2];
+	}
+
+	return median;
 }
